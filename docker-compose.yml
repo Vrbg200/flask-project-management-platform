@@ -1,0 +1,106 @@
+version: '3.8'
+
+services:
+  # Base de datos PostgreSQL
+  postgres:
+    image: postgres:15-alpine
+    container_name: salesflow-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: salesflow
+      POSTGRES_PASSWORD: salesflow_secure_password
+      POSTGRES_DB: salesflow
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - salesflow-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U salesflow"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: salesflow-backend
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 5000
+      DATABASE_URL: postgresql://salesflow:salesflow_secure_password@postgres:5432/salesflow
+      JWT_SECRET: ${JWT_SECRET:-change_this_secret_in_production}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-change_this_refresh_secret_in_production}
+      JWT_EXPIRE: 15m
+      JWT_REFRESH_EXPIRE: 7d
+      FRONTEND_URL: http://localhost:3000
+    ports:
+      - "5000:5000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    networks:
+      - salesflow-network
+    command: sh -c "npx prisma migrate deploy && npm start"
+
+  # Frontend React
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: salesflow-frontend
+    restart: unless-stopped
+    environment:
+      VITE_API_URL: http://localhost:5000/api
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - salesflow-network
+
+  # Redis para caché (opcional pero recomendado)
+  redis:
+    image: redis:7-alpine
+    container_name: salesflow-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - salesflow-network
+    command: redis-server --appendonly yes
+
+  # Adminer para gestión de base de datos (desarrollo)
+  adminer:
+    image: adminer:latest
+    container_name: salesflow-adminer
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    networks:
+      - salesflow-network
+    environment:
+      ADMINER_DEFAULT_SERVER: postgres
+      ADMINER_DESIGN: pepa-linha
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  salesflow-network:
+    driver: bridge
+
