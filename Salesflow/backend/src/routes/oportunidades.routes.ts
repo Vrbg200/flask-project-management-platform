@@ -1,4 +1,4 @@
-mport { Router } from 'express';
+import { Router } from 'express';
 import { PrismaClient, EtapaVenta } from '@prisma/client';
 import { z } from 'zod';
 import { autenticar, registrarActividad } from '../middleware/auth.middleware';
