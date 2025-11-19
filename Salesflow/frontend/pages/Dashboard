@@ -1,0 +1,1361 @@
+import React, { useState, useEffect } from 'react';
+import { 
+  TrendingUp, Users, DollarSign, ShoppingCart, Activity, Target, Calendar,
+  BarChart3, PieChart, ArrowUpRight, ArrowDownRight, Plus, Search, Edit,
+  Trash2, Eye, Phone, Mail, MapPin, Building2, Package, CreditCard,
+  CheckCircle, XCircle, Clock, Filter, Download, RefreshCw, LogOut, X, Save
+} from 'lucide-react';
+import { LineChart, Line, BarChart, Bar, PieChart as RePieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+
+// ==================== TYPES ====================
+interface Usuario {
+  id: string;
+  nombre: string;
+  apellido: string;
+  email: string;
+  rol: 'ADMIN' | 'GERENTE' | 'VENDEDOR';
+}
+
+interface Cliente {
+  id: string;
+  nombre: string;
+  email: string;
+  telefono: string;
+  direccion: string;
+  tipo: string;
+  industria: string;
+  estado: string;
+}
+
+interface Producto {
+  id: string;
+  codigo: string;
+  nombre: string;
+  categoria: string;
+  precio: number;
+  stock: number;
+  activo: boolean;
+}
+
+interface Oportunidad {
+  id: string;
+  titulo: string;
+  clienteNombre: string;
+  clienteId: string;
+  valor: number;
+  etapa: string;
+  probabilidad: number;
+  fechaCierre: string;
+}
+
+interface Venta {
+  id: string;
+  numeroVenta: string;
+  clienteNombre: string;
+  clienteId: string;
+  total: number;
+  estado: string;
+  fechaVenta: string;
+}
+
+interface Actividad {
+  id: string;
+  tipo: string;
+  titulo: string;
+  descripcion?: string;
+  cliente: string;
+  clienteId: string;
+  fecha: string;
+  completada: boolean;
+  prioridad: string;
+}
+
+// ==================== MAIN APP ====================
+export default function SalesFlowApp() {
+  const [activeView, setActiveView] = useState('dashboard');
+  const [darkMode, setDarkMode] = useState(false);
+  const [usuario] = useState<Usuario>({
+    id: '1',
+    nombre: 'Juan',
+    apellido: 'Vendedor',
+    email: 'vendedor@salesflow.com',
+    rol: 'VENDEDOR'
+  });
+
+  const [clientes, setClientes] = useState<Cliente[]>([]);
+  const [productos, setProductos] = useState<Producto[]>([]);
+  const [oportunidades, setOportunidades] = useState<Oportunidad[]>([]);
+  const [ventas, setVentas] = useState<Venta[]>([]);
+  const [actividades, setActividades] = useState<Actividad[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = () => {
+    setLoading(true);
+    setTimeout(() => {
+      setClientes([
+        { id: '1', nombre: 'TechCorp Guatemala', email: 'contacto@techcorp.gt', telefono: '+502 2300-0000', direccion: 'Zona 10, Ciudad', tipo: 'EMPRESA', industria: 'TECNOLOGIA', estado: 'ACTIVO' },
+        { id: '2', nombre: 'Distribuidora Central', email: 'ventas@distribuidora.com', telefono: '+502 2400-0000', direccion: 'Zona 4, Ciudad', tipo: 'EMPRESA', industria: 'RETAIL', estado: 'ACTIVO' },
+        { id: '3', nombre: 'Servicios Médicos', email: 'info@serviciosmedicos.gt', telefono: '+502 2500-0000', direccion: 'Zona 14, Ciudad', tipo: 'EMPRESA', industria: 'SALUD', estado: 'ACTIVO' },
+        { id: '4', nombre: 'Constructora Moderna', email: 'proyectos@constructora.com', telefono: '+502 2600-0000', direccion: 'Zona 15, Ciudad', tipo: 'EMPRESA', industria: 'CONSTRUCCION', estado: 'ACTIVO' },
+        { id: '5', nombre: 'Importadora del Pacífico', email: 'contacto@importadora.com', telefono: '+502 2700-0000', direccion: 'Escuintla', tipo: 'EMPRESA', industria: 'IMPORTACION', estado: 'ACTIVO' },
+      ]);
+
+      setProductos([
+        { id: '1', codigo: 'CRM-001', nombre: 'Licencia CRM Empresarial', categoria: 'SOFTWARE', precio: 2500, stock: 50, activo: true },
+        { id: '2', codigo: 'CONS-001', nombre: 'Consultoría Estratégica', categoria: 'SERVICIOS', precio: 5000, stock: 999, activo: true },
+        { id: '3', codigo: 'TRAIN-001', nombre: 'Capacitación Equipo Ventas', categoria: 'SERVICIOS', precio: 3500, stock: 999, activo: true },
+        { id: '4', codigo: 'ERP-001', nombre: 'Sistema ERP Integrado', categoria: 'SOFTWARE', precio: 15000, stock: 20, activo: true },
+        { id: '5', codigo: 'SUPP-001', nombre: 'Soporte Técnico Premium', categoria: 'SERVICIOS', precio: 800, stock: 999, activo: true },
+      ]);
+
+      setOportunidades([
+        { id: '1', titulo: 'Implementación CRM TechCorp', clienteNombre: 'TechCorp Guatemala', clienteId: '1', valor: 25000, etapa: 'NEGOCIACION', probabilidad: 75, fechaCierre: '2025-12-15' },
+        { id: '2', titulo: 'Capacitación Distribuidora', clienteNombre: 'Distribuidora Central', clienteId: '2', valor: 8500, etapa: 'CALIFICADO', probabilidad: 60, fechaCierre: '2025-11-30' },
+        { id: '3', titulo: 'ERP Servicios Médicos', clienteNombre: 'Servicios Médicos', clienteId: '3', valor: 75000, etapa: 'PROSPECTO', probabilidad: 30, fechaCierre: '2026-02-28' },
+        { id: '4', titulo: 'Consultoría Constructora', clienteNombre: 'Constructora Moderna', clienteId: '4', valor: 15000, etapa: 'CIERRE', probabilidad: 90, fechaCierre: '2025-11-20' },
+      ]);
+
+      setVentas([
+        { id: '1', numeroVenta: 'VTA-2025-001', clienteNombre: 'Importadora del Pacífico', clienteId: '5', total: 10752, estado: 'COMPLETADO', fechaVenta: '2025-11-01' },
+        { id: '2', numeroVenta: 'VTA-2025-002', clienteNombre: 'TechCorp Guatemala', clienteId: '1', total: 5600, estado: 'COMPLETADO', fechaVenta: '2025-10-15' },
+        { id: '3', numeroVenta: 'VTA-2025-003', clienteNombre: 'Distribuidora Central', clienteId: '2', total: 12450, estado: 'ENVIADO', fechaVenta: '2025-11-10' },
+      ]);
+
+      setActividades([
+        { id: '1', tipo: 'Reunión', titulo: 'Presentación CRM', descripcion: 'Demo completo del sistema', cliente: 'TechCorp Guatemala', clienteId: '1', fecha: '2025-11-18T10:00', completada: false, prioridad: 'ALTA' },
+        { id: '2', tipo: 'Llamada', titulo: 'Seguimiento propuesta', descripcion: 'Verificar interés', cliente: 'Distribuidora Central', clienteId: '2', fecha: '2025-11-16T14:00', completada: true, prioridad: 'MEDIA' },
+        { id: '3', tipo: 'Email', titulo: 'Envío de cotización', descripcion: 'Cotización formal', cliente: 'Servicios Médicos', clienteId: '3', fecha: '2025-11-15T09:30', completada: true, prioridad: 'BAJA' },
+        { id: '4', tipo: 'Tarea', titulo: 'Preparar demo', descripcion: 'Ambiente de prueba', cliente: 'Constructora Moderna', clienteId: '4', fecha: '2025-11-20T15:00', completada: false, prioridad: 'ALTA' },
+      ]);
+
+      setLoading(false);
+    }, 500);
+  };
+
+  const renderContent = () => {
+    if (loading) {
+      return (
+        <div className="flex items-center justify-center h-96">
+          <div className="flex flex-col items-center space-y-4">
+            <RefreshCw className="animate-spin text-blue-600" size={48} />
+            <p className="text-gray-500">Cargando datos...</p>
+          </div>
+        </div>
+      );
+    }
+
+    switch (activeView) {
+      case 'dashboard':
+        return <DashboardView darkMode={darkMode} />;
+      case 'clientes':
+        return <ClientesView clientes={clientes} setClientes={setClientes} darkMode={darkMode} onRefresh={loadData} />;
+      case 'oportunidades':
+        return <OportunidadesView oportunidades={oportunidades} setOportunidades={setOportunidades} clientes={clientes} darkMode={darkMode} />;
+      case 'productos':
+        return <ProductosView productos={productos} setProductos={setProductos} darkMode={darkMode} />;
+      case 'ventas':
+        return <VentasView ventas={ventas} setVentas={setVentas} clientes={clientes} productos={productos} darkMode={darkMode} />;
+      case 'actividades':
+        return <ActividadesView actividades={actividades} setActividades={setActividades} clientes={clientes} darkMode={darkMode} />;
+      case 'reportes':
+        return <ReportesView ventas={ventas} clientes={clientes} oportunidades={oportunidades} darkMode={darkMode} />;
+      default:
+        return <DashboardView darkMode={darkMode} />;
+    }
+  };
+
+  return (
+    <div className={`min-h-screen ${darkMode ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'}`}>
+      <aside className={`fixed left-0 top-0 h-full w-64 ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border-r shadow-lg z-50`}>
+        <div className="p-6">
+          <div className="flex items-center space-x-3 mb-8">
+            <div className="bg-blue-600 p-2 rounded-lg">
+              <BarChart3 className="text-white" size={24} />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold">SalesFlow</h1>
+              <p className="text-xs text-gray-500">v1.0.0</p>
+            </div>
+          </div>
+
+          <nav className="space-y-2">
+            {[
+              { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
+              { id: 'clientes', label: 'Clientes', icon: Users },
+              { id: 'oportunidades', label: 'Pipeline', icon: Target },
+              { id: 'productos', label: 'Productos', icon: ShoppingCart },
+              { id: 'ventas', label: 'Ventas', icon: DollarSign },
+              { id: 'actividades', label: 'Actividades', icon: Calendar },
+              { id: 'reportes', label: 'Reportes', icon: PieChart }
+            ].map((item) => (
+              <button
+                key={item.id}
+                onClick={() => setActiveView(item.id)}
+                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-all ${
+                  activeView === item.id
+                    ? 'bg-blue-600 text-white shadow-lg'
+                    : `${darkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-700 hover:bg-gray-100'}`
+                }`}
+              >
+                <item.icon size={20} />
+                <span className="font-medium">{item.label}</span>
+              </button>
+            ))}
+          </nav>
+        </div>
+
+        <div className="absolute bottom-0 w-full p-6 border-t border-gray-200">
+          <div className="flex items-center space-x-3 mb-4">
+            <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold">
+              {usuario.nombre[0]}{usuario.apellido[0]}
+            </div>
+            <div className="flex-1">
+              <p className="font-semibold text-sm">{usuario.nombre} {usuario.apellido}</p>
+              <p className="text-xs text-gray-500">{usuario.rol}</p>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <main className="ml-64 p-8">
+        <header className="flex items-center justify-between mb-8">
+          <div>
+            <h2 className="text-3xl font-bold mb-2">
+              {activeView === 'dashboard' && 'Dashboard'}
+              {activeView === 'clientes' && 'Gestión de Clientes'}
+              {activeView === 'oportunidades' && 'Pipeline de Ventas'}
+              {activeView === 'productos' && 'Gestión de Productos'}
+              {activeView === 'ventas' && 'Registro de Ventas'}
+              {activeView === 'actividades' && 'Actividades y Tareas'}
+              {activeView === 'reportes' && 'Reportes y Análisis'}
+            </h2>
+            <p className="text-gray-500">
+              {new Date().toLocaleDateString('es-GT', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+            </p>
+          </div>
+
+          <button
+            onClick={() => setDarkMode(!darkMode)}
+            className={`p-2 rounded-lg border ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}
+          >
+            {darkMode ? '☀️' : '🌙'}
+          </button>
+        </header>
+
+        {renderContent()}
+      </main>
+    </div>
+  );
+}
+
+// ==================== DASHBOARD VIEW ====================
+function DashboardView({ darkMode }: { darkMode: boolean }) {
+  const ventasPorMes = [
+    { mes: 'Jun', ventas: 45000, meta: 50000 },
+    { mes: 'Jul', ventas: 52000, meta: 55000 },
+    { mes: 'Ago', ventas: 48000, meta: 55000 },
+    { mes: 'Sep', ventas: 61000, meta: 60000 },
+    { mes: 'Oct', ventas: 58000, meta: 65000 },
+    { mes: 'Nov', ventas: 72000, meta: 70000 }
+  ];
+
+  const oportunidadesPorEtapa = [
+    { etapa: 'Prospecto', valor: 45000 },
+    { etapa: 'Calificado', valor: 68000 },
+    { etapa: 'Negociación', valor: 95000 },
+    { etapa: 'Cierre', valor: 120000 }
+  ];
+
+  const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444'];
+
+  return (
+    <div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <MetricCard title="Ventas Totales" value="Q125,430" change={12.5} icon={DollarSign} color="blue" darkMode={darkMode} />
+        <MetricCard title="Clientes Activos" value={48} change={8.2} icon={Users} color="green" darkMode={darkMode} />
+        <MetricCard title="Oportunidades" value={23} change={15.3} icon={Target} color="orange" darkMode={darkMode} />
+        <MetricCard title="Tasa Conversión" value="68.4%" change={4.1} icon={TrendingUp} color="purple" darkMode={darkMode} />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className={`lg:col-span-2 ${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl p-6 shadow-lg`}>
+          <h3 className="text-xl font-bold mb-6">Ventas Mensuales</h3>
+          <ResponsiveContainer width="100%" height={300}>
+            <LineChart data={ventasPorMes}>
+              <CartesianGrid strokeDasharray="3 3" stroke={darkMode ? '#374151' : '#E5E7EB'} />
+              <XAxis dataKey="mes" stroke={darkMode ? '#9CA3AF' : '#6B7280'} />
+              <YAxis stroke={darkMode ? '#9CA3AF' : '#6B7280'} />
+              <Tooltip contentStyle={{ backgroundColor: darkMode ? '#1F2937' : '#FFFFFF', border: `1px solid ${darkMode ? '#374151' : '#E5E7EB'}`, borderRadius: '8px' }} />
+              <Legend />
+              <Line type="monotone" dataKey="ventas" stroke="#3B82F6" strokeWidth={3} name="Ventas" />
+              <Line type="monotone" dataKey="meta" stroke="#10B981" strokeWidth={2} strokeDasharray="5 5" name="Meta" />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+
+        <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl p-6 shadow-lg`}>
+          <h3 className="text-xl font-bold mb-6">Pipeline</h3>
+          <ResponsiveContainer width="100%" height={300}>
+            <RePieChart>
+              <Pie data={oportunidadesPorEtapa} cx="50%" cy="50%" labelLine={false} label={(entry) => entry.etapa} outerRadius={80} fill="#8884d8" dataKey="valor">
+                {oportunidadesPorEtapa.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                ))}
+              </Pie>
+              <Tooltip contentStyle={{ backgroundColor: darkMode ? '#1F2937' : '#FFFFFF', border: `1px solid ${darkMode ? '#374151' : '#E5E7EB'}`, borderRadius: '8px' }} />
+            </RePieChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ==================== CLIENTES VIEW ====================
+function ClientesView({ clientes, setClientes, darkMode, onRefresh }: any) {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [showModal, setShowModal] = useState(false);
+  const [editingCliente, setEditingCliente] = useState<Cliente | null>(null);
+  const [formData, setFormData] = useState({
+    nombre: '',
+    email: '',
+    telefono: '',
+    direccion: '',
+    tipo: 'EMPRESA',
+    industria: ''
+  });
+
+  const filteredClientes = clientes.filter((c: Cliente) =>
+    c.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    c.email.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const handleOpenModal = (cliente?: Cliente) => {
+    if (cliente) {
+      setEditingCliente(cliente);
+      setFormData({
+        nombre: cliente.nombre,
+        email: cliente.email,
+        telefono: cliente.telefono,
+        direccion: cliente.direccion,
+        tipo: cliente.tipo,
+        industria: cliente.industria
+      });
+    } else {
+      setEditingCliente(null);
+      setFormData({ nombre: '', email: '', telefono: '', direccion: '', tipo: 'EMPRESA', industria: '' });
+    }
+    setShowModal(true);
+  };
+
+  const handleSave = () => {
+    if (editingCliente) {
+      setClientes(clientes.map((c: Cliente) => c.id === editingCliente.id ? { ...c, ...formData } : c));
+      alert('✅ Cliente actualizado correctamente');
+    } else {
+      const newCliente = {
+        id: Date.now().toString(),
+        ...formData,
+        estado: 'ACTIVO'
+      };
+      setClientes([...clientes, newCliente]);
+      alert('✅ Cliente creado correctamente');
+    }
+    setShowModal(false);
+  };
+
+  const handleDelete = (id: string) => {
+    if (confirm('¿Estás seguro de eliminar este cliente?')) {
+      setClientes(clientes.filter((c: Cliente) => c.id !== id));
+      alert('✅ Cliente eliminado');
+    }
+  };
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-6">
+        <div className="relative flex-1 max-w-md">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+          <input
+            type="text"
+            placeholder="Buscar clientes..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className={`w-full pl-10 pr-4 py-2 rounded-lg border ${darkMode ? 'bg-gray-800 border-gray-700 text-white' : 'bg-white border-gray-200'}`}
+          />
+        </div>
+        <button onClick={() => handleOpenModal()} className="ml-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center space-x-2">
+          <Plus size={20} />
+          <span>Nuevo Cliente</span>
+        </button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {filteredClientes.map((cliente: Cliente) => (
+          <div key={cliente.id} className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl p-6 shadow-lg`}>
+            <div className="flex items-start justify-between mb-4">
+              <div className="flex items-center space-x-3">
+                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <Building2 className="text-blue-600" size={24} />
+                </div>
+                <div>
+                  <h3 className="font-bold text-lg">{cliente.nombre}</h3>
+                  <span className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded-full">{cliente.tipo}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-2 mb-4">
+              <div className="flex items-center space-x-2 text-sm text-gray-500">
+                <Mail size={16} />
+                <span>{cliente.email}</span>
+              </div>
+              <div className="flex items-center space-x-2 text-sm text-gray-500">
+                <Phone size={16} />
+                <span>{cliente.telefono}</span>
+              </div>
+              <div className="flex items-center space-x-2 text-sm text-gray-500">
+                <MapPin size={16} />
+                <span>{cliente.direccion}</span>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between pt-4 border-t">
+              <span className="text-sm text-gray-500">{cliente.industria}</span>
+              <div className="flex space-x-2">
+                <button onClick={() => handleOpenModal(cliente)} className="p-2 hover:bg-blue-100 rounded-lg text-blue-600">
+                  <Edit size={16} />
+                </button>
+                <button onClick={() => handleDelete(cliente.id)} className="p-2 hover:bg-red-100 rounded-lg text-red-600">
+                  <Trash2 size={16} />
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Modal */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl p-6 w-full max-w-md`}>
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-bold">{editingCliente ? 'Editar Cliente' : 'Nuevo Cliente'}</h3>
+              <button onClick={() => setShowModal(false)}><X size={24} /></button>
+            </div>
+            <div className="space-y-4">
+              <input
+                type="text"
+                placeholder="Nombre"
+                value={formData.nombre}
+                onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
+                className={`w-full px-4 py-2 border rounded-lg ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-300'}`}
+              />
+              <input
+                type="email"
+                placeholder="Email"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                className={`w-full px-4 py-2 border rounded-lg ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-300'}`}
+              />
+              <input
+                type="text"
+                placeholder="Teléfono"
+                value={formData.telefono}
+                onChange={(e) => setFormData({ ...formData, telefono: e.target.value })}
+                className={`w-full px-4 py-2 border rounded-lg ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-300'}`}
+              />
+              <input
+                type="text"
+                placeholder="Dirección"
+                value={formData.direccion}
+                onChange={(e) => setFormData({ ...formData, direccion: e.target.value })}
+                className={`w-full px-4 py-2 border rounded-lg ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-300'}`}
+              />
+              <input
+                type="text"
+                placeholder="Industria"
+                value={formData.industria}
+                onChange={(e) => setFormData({ ...formData, industria: e.target.value })}
+                className={`w-full px-4 py-2 border rounded-lg ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-300'}`}
+              />
+              <button onClick={handleSave} className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center justify-center space-x-2">
+                <Save size={20} />
+                <span>{editingCliente ? 'Actualizar' : 'Crear'} Cliente</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ==================== OPORTUNIDADES VIEW ====================
+function OportunidadesView({ oportunidades, setOportunidades, clientes, darkMode }: any) {
+  const [showModal, setShowModal] = useState(false);
+  const [formData, setFormData] = useState({
+    titulo: '',
+    clienteId: '',
+    valor: '',
+    etapa: 'PROSPECTO',
+    probabilidad: 30,
+    fechaCierre: ''
+  });
+
+  const etapas = ['PROSPECTO', 'CALIFICADO', 'NEGOCIACION', 'CIERRE'];
+  const oportunidadesPorEtapa = etapas.reduce((acc, etapa) => {
+    acc[etapa] = oportunidades.filter((o: Oportunidad) => o.etapa === etapa);
+    return acc;
+  }, {} as Record<string, Oportunidad[]>);
+
+  const handleSave = () => {
+    const cliente = clientes.find((c: Cliente) => c.id === formData.clienteId);
+    if (!cliente) {
+      alert('❌ Selecciona un cliente válido');
+      return;
+    }
+
+    const newOportunidad = {
+      id: Date.now().toString(),
+      titulo: formData.titulo,
+      clienteId: formData.clienteId,
+      clienteNombre: cliente.nombre,
+      valor: parseFloat(formData.valor),
+      etapa: formData.etapa,
+      probabilidad: formData.probabilidad,
+      fechaCierre: formData.fechaCierre
+    };
+
+    setOportunidades([...oportunidades, newOportunidad]);
+    setShowModal(false);
+    setFormData({ titulo: '', clienteId: '', valor: '', etapa: 'PROSPECTO', probabilidad: 30, fechaCierre: '' });
+    alert('✅ Oportunidad creada exitosamente');
+  };
+
+  const handleDelete = (id: string) => {
+    if (confirm('¿Eliminar esta oportunidad?')) {
+      setOportunidades(oportunidades.filter((o: Oportunidad) => o.id !== id));
+      alert('✅ Oportunidad eliminada');
+    }
+  };
+
+  return (
+    <div>
+      <div className="flex justify-between items-center mb-6">
+        <h3 className="text-xl font-bold">Pipeline de Ventas - Vista Kanban</h3>
+        <button onClick={() => setShowModal(true)} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center space-x-2">
+          <Plus size={20} />
+          <span>Nueva Oportunidad</span>
+        </button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {etapas.map((etapa) => (
+          <div key={etapa} className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl p-4 shadow-lg`}>
+            <div className="flex items-center justify-between mb-4">
+              <h4 className="font-bold">{etapa}</h4>
+              <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-semibold">
+                {oportunidadesPorEtapa[etapa]?.length || 0}
+              </span>
+            </div>
+            <div className="space-y-3 max-h-96 overflow-y-auto">
+              {oportunidadesPorEtapa[etapa]?.map((oportunidad: Oportunidad) => (
+                <div key={oportunidad.id} className={`p-4 rounded-lg border ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'} hover:shadow-md transition-shadow`}>
+                  <div className="flex justify-between items-start mb-2">
+                    <h5 className="font-semibold flex-1">{oportunidad.titulo}</h5>
+                    <button onClick={() => handleDelete(oportunidad.id)} className="text-red-600 hover:bg-red-100 p-1 rounded">
+                      <X size={14} />
+                    </button>
+                  </div>
+                  <p className="text-sm text-gray-500 mb-2">{oportunidad.clienteNombre}</p>
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-green-600">Q{oportunidad.valor.toLocaleString()}</span>
+                    <span className="text-xs px-2 py-1 bg-purple-100 text-purple-700 rounded-full">{oportunidad.probabilidad}%</span>
+                  </div>
+                  <p className="text-xs text-gray-400 mt-2">Cierre: {new Date(oportunidad.fechaCierre).toLocaleDateString('es-GT')}</p>
+                </div>
+              ))}
+              {(!oportunidadesPorEtapa[etapa] || oportunidadesPorEtapa[etapa].length === 0) && (
+                <div className="text-center py-8 text-gray-400">
+                  <Target className="mx-auto mb-2" size={32} />
+                  <p className="text-sm">Sin oportunidades</p>
+                </div>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Modal */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl p-6 w-full max-w-md`}>
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-bold">Nueva Oportunidad</h3>
+              <button onClick={() => setShowModal(false)}><X size={24} /></button>
+            </div>
+            <div className="space-y-4">
+              <input
+                type="text"
+                placeholder="Título"
+                value={formData.titulo}
+                onChange={(e) => setFormData({ ...formData, titulo: e.target.value })}
+                className={`w-full px-4 py-2 border rounded-lg ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300'}`}
+              />
+              <select
+                value={formData.clienteId}
+                onChange={(e) => setFormData({ ...formData, clienteId: e.target.value })}
+                className={`w-full px-4 py-2 border rounded-lg ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300'}`}
+              >
+                <option value="">Seleccionar cliente</option>
+                {clientes.map((c: Cliente) => (
+                  <option key={c.id} value={c.id}>{c.nombre}</option>
+                ))}
+              </select>
+              <input
+                type="number"
+                placeholder="Valor (Q)"
+                value={formData.valor}
+                onChange={(e) => setFormData({ ...formData, valor: e.target.value })}
+                className={`w-full px-4 py-2 border rounded-lg ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300'}`}
+              />
+              <select
+                value={formData.etapa}
+                onChange={(e) => setFormData({ ...formData, etapa: e.target.value })}
+                className={`w-full px-4 py-2 border rounded-lg ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300'}`}
+              >
+                <option value="PROSPECTO">Prospecto</option>
+                <option value="CALIFICADO">Calificado</option>
+                <option value="NEGOCIACION">Negociación</option>
+                <option value="CIERRE">Cierre</option>
+              </select>
+              <input
+                type="date"
+                value={formData.fechaCierre}
+                onChange={(e) => setFormData({ ...formData, fechaCierre: e.target.value })}
+                className={`w-full px-4 py-2 border rounded-lg ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300'}`}
+              />
+              <button onClick={handleSave} className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center justify-center space-x-2">
+                <Save size={20} />
+                <span>Crear Oportunidad</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ==================== PRODUCTOS VIEW ====================
+function ProductosView({ productos, setProductos, darkMode }: any) {
+  const [showModal, setShowModal] = useState(false);
+  const [editingProducto, setEditingProducto] = useState<Producto | null>(null);
+  const [formData, setFormData] = useState({
+    codigo: '',
+    nombre: '',
+    categoria: '',
+    precio: '',
+    stock: ''
+  });
+
+  const handleOpenModal = (producto?: Producto) => {
+    if (producto) {
+      setEditingProducto(producto);
+      setFormData({
+        codigo: producto.codigo,
+        nombre: producto.nombre,
+        categoria: producto.categoria,
+        precio: producto.precio.toString(),
+        stock: producto.stock.toString()
+      });
+    } else {
+      setEditingProducto(null);
+      setFormData({ codigo: '', nombre: '', categoria: '', precio: '', stock: '' });
+    }
+    setShowModal(true);
+  };
+
+  const handleSave = () => {
+    if (editingProducto) {
+      setProductos(productos.map((p: Producto) => p.id === editingProducto.id ? { ...p, ...formData, precio: parseFloat(formData.precio), stock: parseInt(formData.stock) } : p));
+      alert('✅ Producto actualizado');
+    } else {
+      const newProducto = {
+        id: Date.now().toString(),
+        codigo: formData.codigo,
+        nombre: formData.nombre,
+        categoria: formData.categoria,
+        precio: parseFloat(formData.precio),
+        stock: parseInt(formData.stock),
+        activo: true
+      };
+      setProductos([...productos, newProducto]);
+      alert('✅ Producto creado');
+    }
+    setShowModal(false);
+  };
+
+  const handleDelete = (id: string) => {
+    if (confirm('¿Eliminar este producto?')) {
+      setProductos(productos.filter((p: Producto) => p.id !== id));
+      alert('✅ Producto eliminado');
+    }
+  };
+
+  return (
+    <div>
+      <div className="flex justify-between items-center mb-6">
+        <h3 className="text-xl font-bold">Catálogo de Productos</h3>
+        <button onClick={() => handleOpenModal()} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center space-x-2">
+          <Plus size={20} />
+          <span>Nuevo Producto</span>
+        </button>
+      </div>
+
+      <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl shadow-lg overflow-hidden`}>
+        <table className="w-full">
+          <thead className={`${darkMode ? 'bg-gray-700' : 'bg-gray-50'}`}>
+            <tr>
+              <th className="px-6 py-4 text-left text-sm font-semibold">Código</th>
+              <th className="px-6 py-4 text-left text-sm font-semibold">Producto</th>
+              <th className="px-6 py-4 text-left text-sm font-semibold">Categoría</th>
+              <th className="px-6 py-4 text-right text-sm font-semibold">Precio</th>
+              <th className="px-6 py-4 text-right text-sm font-semibold">Stock</th>
+              <th className="px-6 py-4 text-center text-sm font-semibold">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {productos.map((producto: Producto) => (
+              <tr key={producto.id} className={`border-t ${darkMode ? 'border-gray-700' : 'border-gray-200'} hover:bg-gray-50 dark:hover:bg-gray-700`}>
+                <td className="px-6 py-4 text-sm font-mono">{producto.codigo}</td>
+                <td className="px-6 py-4 font-semibold">{producto.nombre}</td>
+                <td className="px-6 py-4 text-sm">{producto.categoria}</td>
+                <td className="px-6 py-4 text-right font-bold text-green-600">Q{producto.precio.toLocaleString()}</td>
+                <td className="px-6 py-4 text-right">
+                  <span className={`px-2 py-1 rounded-full text-xs ${producto.stock > 20 ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                    {producto.stock} unidades
+                  </span>
+                </td>
+                <td className="px-6 py-4">
+                  <div className="flex justify-center space-x-2">
+                    <button onClick={() => handleOpenModal(producto)} className="p-2 hover:bg-blue-100 rounded-lg text-blue-600">
+                      <Edit size={16} />
+                    </button>
+                    <button onClick={() => handleDelete(producto.id)} className="p-2 hover:bg-red-100 rounded-lg text-red-600">
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Modal */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl p-6 w-full max-w-md`}>
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-bold">{editingProducto ? 'Editar Producto' : 'Nuevo Producto'}</h3>
+              <button onClick={() => setShowModal(false)}><X size={24} /></button>
+            </div>
+            <div className="space-y-4">
+              <input
+                type="text"
+                placeholder="Código"
+                value={formData.codigo}
+                onChange={(e) => setFormData({ ...formData, codigo: e.target.value })}
+                className={`w-full px-4 py-2 border rounded-lg ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300'}`}
+              />
+              <input
+                type="text"
+                placeholder="Nombre"
+                value={formData.nombre}
+                onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
+                className={`w-full px-4 py-2 border rounded-lg ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300'}`}
+              />
+              <input
+                type="text"
+                placeholder="Categoría"
+                value={formData.categoria}
+                onChange={(e) => setFormData({ ...formData, categoria: e.target.value })}
+                className={`w-full px-4 py-2 border rounded-lg ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300'}`}
+              />
+              <input
+                type="number"
+                placeholder="Precio (Q)"
+                value={formData.precio}
+                onChange={(e) => setFormData({ ...formData, precio: e.target.value })}
+                className={`w-full px-4 py-2 border rounded-lg ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300'}`}
+              />
+              <input
+                type="number"
+                placeholder="Stock"
+                value={formData.stock}
+                onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
+                className={`w-full px-4 py-2 border rounded-lg ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300'}`}
+              />
+              <button onClick={handleSave} className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center justify-center space-x-2">
+                <Save size={20} />
+                <span>{editingProducto ? 'Actualizar' : 'Crear'} Producto</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ==================== VENTAS VIEW ====================
+function VentasView({ ventas, setVentas, clientes, productos, darkMode }: any) {
+  const [showModal, setShowModal] = useState(false);
+  const [formData, setFormData] = useState({
+    clienteId: '',
+    productoId: '',
+    cantidad: '1',
+    total: ''
+  });
+
+  const handleSave = () => {
+    const cliente = clientes.find((c: Cliente) => c.id === formData.clienteId);
+    const producto = productos.find((p: Producto) => p.id === formData.productoId);
+    
+    if (!cliente || !producto) {
+      alert('❌ Selecciona cliente y producto');
+      return;
+    }
+
+    const cantidad = parseInt(formData.cantidad);
+    const total = producto.precio * cantidad;
+
+    const newVenta = {
+      id: Date.now().toString(),
+      numeroVenta: `VTA-2025-${(ventas.length + 1).toString().padStart(3, '0')}`,
+      clienteNombre: cliente.nombre,
+      clienteId: cliente.id,
+      total: total,
+      estado: 'COMPLETADO',
+      fechaVenta: new Date().toISOString().split('T')[0]
+    };
+
+    setVentas([...ventas, newVenta]);
+    setShowModal(false);
+    setFormData({ clienteId: '', productoId: '', cantidad: '1', total: '' });
+    alert('✅ Venta registrada exitosamente');
+  };
+
+  const getEstadoColor = (estado: string) => {
+    switch (estado) {
+      case 'COMPLETADO':
+        return 'bg-green-100 text-green-700';
+      case 'ENVIADO':
+        return 'bg-blue-100 text-blue-700';
+      case 'PENDIENTE':
+        return 'bg-yellow-100 text-yellow-700';
+      default:
+        return 'bg-gray-100 text-gray-700';
+    }
+  };
+
+  const handleDownloadPDF = (venta: Venta) => {
+    alert(`📄 Generando PDF de venta ${venta.numeroVenta}...\n\nEn producción, esto descargaría un PDF real con los detalles completos de la venta.`);
+  };
+
+  return (
+    <div>
+      <div className="flex justify-between items-center mb-6">
+        <h3 className="text-xl font-bold">Registro de Ventas</h3>
+        <button onClick={() => setShowModal(true)} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center space-x-2">
+          <Plus size={20} />
+          <span>Nueva Venta</span>
+        </button>
+      </div>
+
+      <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl shadow-lg overflow-hidden`}>
+        <table className="w-full">
+          <thead className={`${darkMode ? 'bg-gray-700' : 'bg-gray-50'}`}>
+            <tr>
+              <th className="px-6 py-4 text-left text-sm font-semibold">N° Venta</th>
+              <th className="px-6 py-4 text-left text-sm font-semibold">Cliente</th>
+              <th className="px-6 py-4 text-left text-sm font-semibold">Fecha</th>
+              <th className="px-6 py-4 text-right text-sm font-semibold">Total</th>
+              <th className="px-6 py-4 text-center text-sm font-semibold">Estado</th>
+              <th className="px-6 py-4 text-center text-sm font-semibold">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {ventas.map((venta: Venta) => (
+              <tr key={venta.id} className={`border-t ${darkMode ? 'border-gray-700' : 'border-gray-200'} hover:bg-gray-50 dark:hover:bg-gray-700`}>
+                <td className="px-6 py-4 font-mono font-semibold">{venta.numeroVenta}</td>
+                <td className="px-6 py-4 font-medium">{venta.clienteNombre}</td>
+                <td className="px-6 py-4 text-sm text-gray-500">{new Date(venta.fechaVenta).toLocaleDateString('es-GT')}</td>
+                <td className="px-6 py-4 text-right font-bold text-green-600 text-lg">Q{venta.total.toLocaleString()}</td>
+                <td className="px-6 py-4 text-center">
+                  <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getEstadoColor(venta.estado)}`}>
+                    {venta.estado}
+                  </span>
+                </td>
+                <td className="px-6 py-4">
+                  <div className="flex justify-center space-x-2">
+                    <button onClick={() => handleDownloadPDF(venta)} className="p-2 hover:bg-blue-100 rounded-lg text-blue-600" title="Descargar PDF">
+                      <Download size={16} />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Modal */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl p-6 w-full max-w-md`}>
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-bold">Nueva Venta</h3>
+              <button onClick={() => setShowModal(false)}><X size={24} /></button>
+            </div>
+            <div className="space-y-4">
+              <select
+                value={formData.clienteId}
+                onChange={(e) => setFormData({ ...formData, clienteId: e.target.value })}
+                className={`w-full px-4 py-2 border rounded-lg ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300'}`}
+              >
+                <option value="">Seleccionar cliente</option>
+                {clientes.map((c: Cliente) => (
+                  <option key={c.id} value={c.id}>{c.nombre}</option>
+                ))}
+              </select>
+              <select
+                value={formData.productoId}
+                onChange={(e) => setFormData({ ...formData, productoId: e.target.value })}
+                className={`w-full px-4 py-2 border rounded-lg ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300'}`}
+              >
+                <option value="">Seleccionar producto</option>
+                {productos.map((p: Producto) => (
+                  <option key={p.id} value={p.id}>{p.nombre} - Q{p.precio}</option>
+                ))}
+              </select>
+              <input
+                type="number"
+                placeholder="Cantidad"
+                value={formData.cantidad}
+                onChange={(e) => setFormData({ ...formData, cantidad: e.target.value })}
+                className={`w-full px-4 py-2 border rounded-lg ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300'}`}
+              />
+              {formData.productoId && (
+                <div className="bg-blue-50 dark:bg-blue-900 p-4 rounded-lg">
+                  <p className="text-sm font-semibold">Total a pagar:</p>
+                  <p className="text-2xl font-bold text-blue-600">
+                    Q{(productos.find((p: Producto) => p.id === formData.productoId)?.precio * parseInt(formData.cantidad || '1')).toLocaleString()}
+                  </p>
+                </div>
+              )}
+              <button onClick={handleSave} className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center justify-center space-x-2">
+                <Save size={20} />
+                <span>Registrar Venta</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ==================== ACTIVIDADES VIEW ====================
+function ActividadesView({ actividades, setActividades, clientes, darkMode }: any) {
+  const [showModal, setShowModal] = useState(false);
+  const [formData, setFormData] = useState({
+    tipo: 'Reunión',
+    titulo: '',
+    descripcion: '',
+    clienteId: '',
+    fecha: '',
+    prioridad: 'MEDIA'
+  });
+
+  const handleSave = () => {
+    const cliente = clientes.find((c: Cliente) => c.id === formData.clienteId);
+    if (!cliente) {
+      alert('❌ Selecciona un cliente');
+      return;
+    }
+
+    const newActividad = {
+      id: Date.now().toString(),
+      tipo: formData.tipo,
+      titulo: formData.titulo,
+      descripcion: formData.descripcion,
+      cliente: cliente.nombre,
+      clienteId: cliente.id,
+      fecha: formData.fecha,
+      completada: false,
+      prioridad: formData.prioridad
+    };
+
+    setActividades([...actividades, newActividad]);
+    setShowModal(false);
+    setFormData({ tipo: 'Reunión', titulo: '', descripcion: '', clienteId: '', fecha: '', prioridad: 'MEDIA' });
+    alert('✅ Actividad creada exitosamente');
+  };
+
+  const toggleCompletada = (id: string) => {
+    setActividades(actividades.map((a: Actividad) => 
+      a.id === id ? { ...a, completada: !a.completada } : a
+    ));
+  };
+
+  const getPrioridadColor = (prioridad: string) => {
+    switch (prioridad) {
+      case 'ALTA':
+        return 'bg-red-100 text-red-700';
+      case 'MEDIA':
+        return 'bg-yellow-100 text-yellow-700';
+      case 'BAJA':
+        return 'bg-blue-100 text-blue-700';
+      default:
+        return 'bg-gray-100 text-gray-700';
+    }
+  };
+
+  return (
+    <div>
+      <div className="flex justify-between items-center mb-6">
+        <h3 className="text-xl font-bold">Actividades y Tareas</h3>
+        <button onClick={() => setShowModal(true)} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center space-x-2">
+          <Plus size={20} />
+          <span>Nueva Actividad</span>
+        </button>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Pendientes */}
+        <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl p-6 shadow-lg`}>
+          <h4 className="font-bold text-lg mb-4 flex items-center space-x-2">
+            <Clock className="text-yellow-600" size={24} />
+            <span>Pendientes</span>
+            <span className="px-2 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs">
+              {actividades.filter((a: Actividad) => !a.completada).length}
+            </span>
+          </h4>
+          <div className="space-y-3">
+            {actividades.filter((a: Actividad) => !a.completada).map((actividad: Actividad) => (
+              <div key={actividad.id} className={`p-4 rounded-lg border ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`}>
+                <div className="flex items-start justify-between mb-2">
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-2 mb-1">
+                      <span className={`px-2 py-1 rounded text-xs font-semibold ${getPrioridadColor(actividad.prioridad)}`}>
+                        {actividad.prioridad}
+                      </span>
+                      <span className="text-xs text-gray-500">{actividad.tipo}</span>
+                    </div>
+                    <h5 className="font-semibold">{actividad.titulo}</h5>
+                    <p className="text-sm text-gray-500">{actividad.cliente}</p>
+                    {actividad.descripcion && <p className="text-xs text-gray-400 mt-1">{actividad.descripcion}</p>}
+                  </div>
+                  <input 
+                    type="checkbox" 
+                    checked={actividad.completada}
+                    onChange={() => toggleCompletada(actividad.id)}
+                    className="w-5 h-5 rounded border-gray-300 cursor-pointer" 
+                  />
+                </div>
+                <div className="flex items-center text-xs text-gray-400 mt-2">
+                  <Calendar size={14} className="mr-1" />
+                  {new Date(actividad.fecha).toLocaleString('es-GT')}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Completadas */}
+        <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl p-6 shadow-lg`}>
+          <h4 className="font-bold text-lg mb-4 flex items-center space-x-2">
+            <CheckCircle className="text-green-600" size={24} />
+            <span>Completadas</span>
+            <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs">
+              {actividades.filter((a: Actividad) => a.completada).length}
+            </span>
+          </h4>
+          <div className="space-y-3">
+            {actividades.filter((a: Actividad) => a.completada).map((actividad: Actividad) => (
+              <div key={actividad.id} className={`p-4 rounded-lg border ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'} opacity-75`}>
+                <div className="flex items-start justify-between mb-2">
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-2 mb-1">
+                      <span className="text-xs text-gray-500">{actividad.tipo}</span>
+                      <CheckCircle className="text-green-600" size={16} />
+                    </div>
+                    <h5 className="font-semibold line-through">{actividad.titulo}</h5>
+                    <p className="text-sm text-gray-500">{actividad.cliente}</p>
+                  </div>
+                  <input 
+                    type="checkbox" 
+                    checked={actividad.completada}
+                    onChange={() => toggleCompletada(actividad.id)}
+                    className="w-5 h-5 rounded border-gray-300 cursor-pointer" 
+                  />
+                </div>
+                <div className="flex items-center text-xs text-gray-400 mt-2">
+                  <Calendar size={14} className="mr-1" />
+                  {new Date(actividad.fecha).toLocaleString('es-GT')}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Modal */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl p-6 w-full max-w-md`}>
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-bold">Nueva Actividad</h3>
+              <button onClick={() => setShowModal(false)}><X size={24} /></button>
+            </div>
+            <div className="space-y-4">
+              <select
+                value={formData.tipo}
+                onChange={(e) => setFormData({ ...formData, tipo: e.target.value })}
+                className={`w-full px-4 py-2 border rounded-lg ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300'}`}
+              >
+                <option value="Reunión">Reunión</option>
+                <option value="Llamada">Llamada</option>
+                <option value="Email">Email</option>
+                <option value="Tarea">Tarea</option>
+              </select>
+              <input
+                type="text"
+                placeholder="Título"
+                value={formData.titulo}
+                onChange={(e) => setFormData({ ...formData, titulo: e.target.value })}
+                className={`w-full px-4 py-2 border rounded-lg ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300'}`}
+              />
+              <textarea
+                placeholder="Descripción"
+                value={formData.descripcion}
+                onChange={(e) => setFormData({ ...formData, descripcion: e.target.value })}
+                rows={3}
+                className={`w-full px-4 py-2 border rounded-lg ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300'}`}
+              />
+              <select
+                value={formData.clienteId}
+                onChange={(e) => setFormData({ ...formData, clienteId: e.target.value })}
+                className={`w-full px-4 py-2 border rounded-lg ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300'}`}
+              >
+                <option value="">Seleccionar cliente</option>
+                {clientes.map((c: Cliente) => (
+                  <option key={c.id} value={c.id}>{c.nombre}</option>
+                ))}
+              </select>
+              <input
+                type="datetime-local"
+                value={formData.fecha}
+                onChange={(e) => setFormData({ ...formData, fecha: e.target.value })}
+                className={`w-full px-4 py-2 border rounded-lg ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300'}`}
+              />
+              <select
+                value={formData.prioridad}
+                onChange={(e) => setFormData({ ...formData, prioridad: e.target.value })}
+                className={`w-full px-4 py-2 border rounded-lg ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300'}`}
+              >
+                <option value="BAJA">Prioridad Baja</option>
+                <option value="MEDIA">Prioridad Media</option>
+                <option value="ALTA">Prioridad Alta</option>
+              </select>
+              <button onClick={handleSave} className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center justify-center space-x-2">
+                <Save size={20} />
+                <span>Crear Actividad</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ==================== REPORTES VIEW ====================
+function ReportesView({ ventas, clientes, oportunidades, darkMode }: any) {
+  const handleDownloadPDF = (reportName: string) => {
+    const reportData = {
+      'Reporte de Ventas Mensual': {
+        totalVentas: ventas.length,
+        ingresoTotal: ventas.reduce((sum: number, v: Venta) => sum + v.total, 0),
+        promedioVenta: ventas.reduce((sum: number, v: Venta) => sum + v.total, 0) / ventas.length
+      },
+      'Análisis de Clientes': {
+        totalClientes: clientes.length,
+        clientesActivos: clientes.filter((c: Cliente) => c.estado === 'ACTIVO').length,
+        industrias: [...new Set(clientes.map((c: Cliente) => c.industria))]
+      },
+      'Performance de Productos': {
+        mensaje: 'Reporte de productos más y menos vendidos'
+      },
+      'Forecast Trimestral': {
+        oportunidadesActivas: oportunidades.length,
+        valorTotal: oportunidades.reduce((sum: number, o: Oportunidad) => sum + o.valor, 0),
+        valorPonderado: oportunidades.reduce((sum: number, o: Oportunidad) => sum + (o.valor * o.probabilidad / 100), 0)
+      }
+    };
+
+    const data = reportData[reportName as keyof typeof reportData];
+    
+    alert(`📄 GENERANDO PDF: ${reportName}\n\n` +
+          `Datos del reporte:\n${JSON.stringify(data, null, 2)}\n\n` +
+          `✅ En producción, esto descargaría un archivo PDF completo con:\n` +
+          `- Gráficos detallados\n` +
+          `- Tablas de datos\n` +
+          `- Análisis estadístico\n` +
+          `- Logo de la empresa\n` +
+          `- Fecha y hora de generación`
+    );
+  };
+
+  const handleDownloadExcel = (reportName: string) => {
+    alert(`📊 GENERANDO EXCEL: ${reportName}\n\n` +
+          `✅ En producción, esto descargaría un archivo Excel (.xlsx) con:\n` +
+          `- Múltiples hojas de cálculo\n` +
+          `- Datos completos y filtros\n` +
+          `- Fórmulas y cálculos\n` +
+          `- Formato profesional\n` +
+          `- Gráficos embebidos`
+    );
+  };
+
+  const reportes = [
+    { 
+      id: '1', 
+      nombre: 'Reporte de Ventas Mensual', 
+      descripcion: 'Resumen completo de ventas del mes', 
+      icono: DollarSign, 
+      color: 'blue' 
+    },
+    { 
+      id: '2', 
+      nombre: 'Análisis de Clientes', 
+      descripcion: 'Segmentación y comportamiento de clientes', 
+      icono: Users, 
+      color: 'green' 
+    },
+    { 
+      id: '3', 
+      nombre: 'Performance de Productos', 
+      descripcion: 'Productos más y menos vendidos', 
+      icono: Package, 
+      color: 'purple' 
+    },
+    { 
+      id: '4', 
+      nombre: 'Forecast Trimestral', 
+      descripcion: 'Proyección de ingresos próximos 3 meses', 
+      icono: TrendingUp, 
+      color: 'orange' 
+    },
+  ];
+
+  return (
+    <div>
+      <div className="mb-8">
+        <h3 className="text-xl font-bold mb-2">Centro de Reportes</h3>
+        <p className="text-gray-500">Genera y descarga reportes personalizados en PDF o Excel</p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        {reportes.map((reporte) => (
+          <div key={reporte.id} className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow`}>
+            <div className="flex items-start space-x-4">
+              <div className={`w-12 h-12 bg-${reporte.color}-100 rounded-lg flex items-center justify-center`}>
+                <reporte.icono className={`text-${reporte.color}-600`} size={24} />
+              </div>
+              <div className="flex-1">
+                <h4 className="font-bold mb-1">{reporte.nombre}</h4>
+                <p className="text-sm text-gray-500 mb-4">{reporte.descripcion}</p>
+                <div className="flex space-x-2">
+                  <button 
+                    onClick={() => handleDownloadPDF(reporte.nombre)}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm flex items-center space-x-2"
+                  >
+                    <Download size={16} />
+                    <span>PDF</span>
+                  </button>
+                  <button 
+                    onClick={() => handleDownloadExcel(reporte.nombre)}
+                    className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 text-sm flex items-center space-x-2"
+                  >
+                    <Download size={16} />
+                    <span>Excel</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Quick Stats */}
+      <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl p-6 shadow-lg`}>
+        <h4 className="font-bold text-lg mb-4">Estadísticas Rápidas</h4>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <div className="text-center">
+            <p className="text-3xl font-bold text-blue-600">
+              Q{ventas.reduce((sum: number, v: Venta) => sum + v.total, 0).toLocaleString()}
+            </p>
+            <p className="text-sm text-gray-500">Ingresos Totales</p>
+          </div>
+          <div className="text-center">
+            <p className="text-3xl font-bold text-green-600">{ventas.length}</p>
+            <p className="text-sm text-gray-500">Ventas Cerradas</p>
+          </div>
+          <div className="text-center">
+            <p className="text-3xl font-bold text-orange-600">{oportunidades.length}</p>
+            <p className="text-sm text-gray-500">Oportunidades Activas</p>
+          </div>
+          <div className="text-center">
+            <p className="text-3xl font-bold text-purple-600">{clientes.length}</p>
+            <p className="text-sm text-gray-500">Clientes Totales</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ==================== METRIC CARD COMPONENT ====================
+function MetricCard({ title, value, change, icon: Icon, color, darkMode }: any) {
+  const isPositive = change > 0;
+  const colors: any = {
+    blue: 'bg-blue-100 text-blue-600',
+    green: 'bg-green-100 text-green-600',
+    orange: 'bg-orange-100 text-orange-600',
+    purple: 'bg-purple-100 text-purple-600'
+  };
+
+  return (
+    <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow`}>
+      <div className="flex items-center justify-between mb-4">
+        <div className={`w-12 h-12 rounded-lg ${colors[color]} flex items-center justify-center`}>
+          <Icon size={24} />
+        </div>
+        <div className={`flex items-center space-x-1 ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
+          {isPositive ? <ArrowUpRight size={16} /> : <ArrowDownRight size={16} />}
+          <span className="text-sm font-semibold">{Math.abs(change)}%</span>
+        </div>
+      </div>
+      <h4 className="text-gray-500 text-sm mb-1">{title}</h4>
+      <p className="text-2xl font-bold">{value}</p>
+    </div>
+  );
+}
